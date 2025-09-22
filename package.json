@@ -1,0 +1,56 @@
+{
+  "name": "@scintilla-network/wallet",
+  "version": "1.0.0-beta.2",
+  "description": "Wallet for Scintilla",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "litest",
+    "test:account": "litest src/primitives/Account/Account.spec.js",
+    "test:wallet": "litest src/primitives/Wallet/Wallet.spec.js",
+    "test:persona": "litest src/primitives/Persona/Persona.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Scintilla-Network/wallet.git"
+  },
+  "homepage": "https://github.com/Scintilla-Network/wallet",
+  "bugs": {
+      "url": "https://github.com/Scintilla-Network/wallet/issues"
+  },
+  "keywords": [
+    "scintilla",
+    "wallet",
+    "account",
+    "persona",
+    "derivation",
+    "mnemonic",
+    "crypto",
+    "cryptography",
+    "signing",
+    "encryption",
+    "post-quantum",
+    "bip32",
+    "bip39",
+    "bip44"
+  ],
+  "type": "module",
+  "author": "Scintilla Labs",
+  "license": "MIT",
+  "dependencies": {
+    "@scintilla-network/hashes": "1.3.1",
+    "@scintilla-network/keys": "1.0.0-beta.19",
+    "@scintilla-network/mnemonic": "2.0.0"
+  },
+  "devDependencies": {
+    "@scintilla-network/litest": "1.3.0"
+  }
+}

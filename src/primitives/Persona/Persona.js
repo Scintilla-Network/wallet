@@ -61,7 +61,7 @@ class Persona {
         if(!this.key) {
             throw new Error('Persona keyring is required.');
         }
-        return new Signer(/** @type {PrivateKey} */ (this.key.getPrivateKey()), this.moniker);
+        return new Signer(this.getAddressKeyring(0, false).getPrivateKey(), this.moniker);
     }
 
     /**

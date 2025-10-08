@@ -54,6 +54,7 @@ class Wallet {
 
             if (isMnemonic) {
                 const mnemonic = new Mnemonic(input);
+
                 this.chainKeyring = SeedKeyring.fromMnemonic(mnemonic.phrase).getChainKeyring({ coinType });
             }
         }  else if ('phrase' in input && typeof input.phrase === 'string') {

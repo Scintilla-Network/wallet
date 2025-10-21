@@ -1,6 +1,6 @@
 {
   "name": "@scintilla-network/wallet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wallet for Scintilla",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

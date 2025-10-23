@@ -49,6 +49,10 @@ class Wallet {
         /** @private @type {ChainKeyring | null} */
         this.chainKeyring = null;
 
+        if(!input) {
+            throw new Error('Input is required to instantiate a Wallet. Use Wallet.create() to create a new wallet.');
+        }
+
         if (typeof input === 'string') {
             const isMnemonic = input.split(' ').length > 1;
 

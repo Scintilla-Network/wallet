@@ -1,10 +1,12 @@
-import { Mnemonic } from '@scintilla-network/mnemonic';
 import { SeedKeyring, ChainKeyring } from '@scintilla-network/keys';
+import { Mnemonic } from '@scintilla-network/mnemonic';
+import { hex } from '@scintilla-network/keys/utils';
+
 import Account from "../Account/Account.js";
 
 /**
  * @typedef {Object} WalletOptions
- * @property {number} [coinType] - The coin type to use
+ * @property {number} [coinType] - The coin type to use (default: 8888)
  */
 
 /**
@@ -29,10 +31,77 @@ class Wallet {
      */
     static create(input, { coinType = 8888 } = {}) {
         if (!input) {
-            const mnemonic = Mnemonic.generateMnemonic();
-            input = mnemonic.toString();
+            input = Wallet.generateMnemonic()
         }
-        return new Wallet(input, { coinType });
+        return Wallet.fromArbitraryInput(input, { coinType });
+    }
+
+    /**
+     * Generate a new random mnemonic.
+     * @returns {string} The new mnemonic.
+     */
+    static generateMnemonic() {
+        const mnemonic = Mnemonic.generateMnemonic();
+        return mnemonic.toString();
+    }
+
+    /**
+     * Generate a new random seed.
+     * @returns {Uint8Array} The new seed.
+     */
+    static generateSeed(password = '') {
+        const mnemonic = Mnemonic.generateMnemonic();
+        const seed = new Mnemonic(mnemonic).toSeed(password);
+        return seed;
+    }
+
+    /**
+     * Create a wallet from a mnemonic.
+     * @param {string} mnemonicInput - The mnemonic to use.
+     * @param {number} [coinType=8888] - The coin type to use.
+     * @returns {Wallet} The new wallet.
+     */
+    static fromMnemonic(mnemonicInput, { coinType = 8888 } = {}) {
+        const mnemonic = new Mnemonic(mnemonicInput);
+        return Wallet.fromSeed(mnemonic.toSeed(), { coinType });
+    }
+
+    /**
+     * Create a wallet from a seed.
+     * @param {Uint8Array | string} seedInput - The seed to use.
+     * @param {number} [coinType=8888] - The coin type to use.
+     * @returns {Wallet} The new wallet.
+     */
+    static fromSeed(seedInput, { coinType = 8888 } = {}) {
+        if(typeof seedInput === 'string') {
+            seedInput = hex.toUint8Array(seedInput);
+        }
+        const seedKeyring = SeedKeyring.fromSeed(seedInput);
+        const chainKeyring = seedKeyring.getChainKeyring({ coinType });
+        return new Wallet({chainKeyring}, { coinType });
+    }
+
+    /**
+     * Create a wallet from an arbitrary input.
+     * @param {string | Uint8Array} input - The input to use.
+     * @param {number} [coinType=8888] - The coin type to use.
+     * @returns {Wallet} The new wallet.
+     */
+    static fromArbitraryInput(input, { coinType = 8888 } = {}) {
+        const typeOfInput = typeof input;
+
+        switch(typeOfInput) {
+            case 'string':
+                const isMnemonic = input.split(' ').length > 1;
+                if(isMnemonic) {
+                    return Wallet.fromMnemonic(input, { coinType });
+                }
+                return Wallet.fromSeed(input, { coinType });
+            case 'Uint8Array':
+                return Wallet.fromSeed(input, { coinType });
+            default:
+                throw new Error(`Use Wallet.create() to create a new wallet with a newly generated mnemonic.`);
+        }
     }
 
     /**
@@ -43,31 +112,12 @@ class Wallet {
      * @throws {Error} When invalid input is provided
      */
     constructor(input, { coinType = 8888 } = {}) {
-        /** @private @type {number} */
-        this.coinType = coinType;
+        if(!input?.chainKeyring) {
+            return Wallet.fromArbitraryInput(input, { coinType });
+        }
 
         /** @private @type {ChainKeyring | null} */
-        this.chainKeyring = null;
-
-        if(!input) {
-            throw new Error('Input is required to instantiate a Wallet. Use Wallet.create() to create a new wallet.');
-        }
-
-        if (typeof input === 'string') {
-            const isMnemonic = input.split(' ').length > 1;
-
-            if (isMnemonic) {
-                const mnemonic = new Mnemonic(input);
-
-                this.chainKeyring = SeedKeyring.fromMnemonic(mnemonic.phrase).getChainKeyring({ coinType });
-            }
-        }  else if ('phrase' in input && typeof input.phrase === 'string') {
-            const mnemonic = input;
-            this.chainKeyring = SeedKeyring.fromMnemonic(mnemonic.phrase).getChainKeyring({ coinType });
-        }
-        else {
-            throw new Error('Invalid input for Wallet instantiation. Provide a mnemonic or private key or call Wallet.create() to generate a new wallet.');
-        }
+        this.chainKeyring = input.chainKeyring;
     }
 
     /**

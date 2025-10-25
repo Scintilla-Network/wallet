@@ -1,6 +1,8 @@
 # @scintilla-network/wallet
 
-Advanced wallet management library for Scintilla Network with comprehensive account, persona, and cryptographic operations support.
+Advanced wallet management library for Scintilla Network.   
+Provides secure and easy to use mnemonic-based wallet creation, account management and persona derivation with general cryptographic operations (encrypt, decrypt, sign, verify).
+
 
 [![npm version](https://badge.fury.io/js/@scintilla-network%2Fwallet.svg)](https://www.npmjs.com/package/@scintilla-network/wallet)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,10 +10,10 @@ Advanced wallet management library for Scintilla Network with comprehensive acco
 ## Features
 
 - **Wallet Management**
-  - BIP39 mnemonic-based wallet creation
-  - Hierarchical deterministic key derivation (BIP32/44)
-  - Multiple account support
-  - Chain-specific key management
+  - BIP39 mnemonic generation and validation
+  - Hierarchical deterministic (HD) key derivation (BIP32/44)
+  - Multiple account support with chain-specific key management
+  - Various input handling (mnemonic, seed, arbitrary input, random generation)
 
 - **Account Operations**
   - Cryptographic signing and verification
@@ -20,9 +22,8 @@ Advanced wallet management library for Scintilla Network with comprehensive acco
 
 - **Persona System**
   - Moniker-based persona management
-  - Multiple address derivation per persona
-  - Persona-specific signing operations
-  - Change address support
+  - Multiple address derivation per persona (receiving and change addresses)
+  - Persona-specific signing and encryption operations
 
 - **Security**
   - Nearly no dependencies except for @noble audited libraries
@@ -54,12 +55,12 @@ const wallet = Wallet.create();
 const account = wallet.getAccount(0);
 
 // Get account address
-const address = account.toAddress('sct');
+const address = account.toAddress();
 console.log('Address:', address.toString());
 
 // Sign a message
 const message = 'Hello, Scintilla!';
-const signature = account.sign(message);
+const [signature] = account.sign(message);
 console.log('Signature:', signature);
 
 // Verify the signature
@@ -87,6 +88,9 @@ const customWallet = Wallet.create(null, { coinType: 118 }); // Cosmos coin type
 // Get multiple accounts
 const account0 = wallet.getAccount(0);
 const account1 = wallet.getAccount(1);
+
+// cosmos1f4qw5wst5cvxqguja02hasfts325s65qtvr6wv
+const address = account0.toAddress('cosmos').toString();
 ```
 
 ### Account Operations
@@ -200,10 +204,16 @@ const blsSig = account.sign(message, {
 
 #### Static Methods
 
-```typescript
-static create(input?: WalletInput, options?: WalletOptions): Wallet
-```
-Creates a new wallet with optional mnemonic input and configuration.
+Static Methods:
+- `create(input?: WalletInput, options?: WalletOptions): Wallet`
+Creates a wallet with an optional mnemonic or seed input. If no input is provided, a new mnemonic is generated.
+
+- `generateMnemonic(): string`
+- `generateSeed(password?: string): Uint8Array`
+- `fromMnemonic(mnemonic: string, options?: WalletOptions): Wallet`
+- `fromSeed(seed: Uint8Array | string, options?: WalletOptions): Wallet`
+- `fromArbitraryInput(input: string | Uint8Array, options?: WalletOptions): Wallet`
+
 
 #### Constructor
 
@@ -211,7 +221,7 @@ Creates a new wallet with optional mnemonic input and configuration.
 new Wallet(input: WalletInput, options?: WalletOptions)
 ```
 
-- `input`: Mnemonic string or `{ phrase: string }` object
+- `input`: Mnemonic string, seed (Uint8Array or hex string) or `{ chainKeyring: ChainKeyring }` object
 - `options.coinType`: BIP44 coin type (default: 8888)
 
 #### Methods
@@ -353,7 +363,6 @@ console.log('Osmosis:', osmosisAddr.toString());
 
 - [@scintilla-network/signatures](https://www.npmjs.com/package/@scintilla-network/signatures): Digital signatures and key exchange
 - [@scintilla-network/ciphers](https://www.npmjs.com/package/@scintilla-network/ciphers): Encryption and decryption utilities
-- [@scintilla-network/hashes](https://www.npmjs.com/package/@scintilla-network/hashes): Hash functions and utilities
 
 ## License
 
@@ -361,4 +370,4 @@ MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. 
